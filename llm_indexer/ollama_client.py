@@ -57,17 +57,20 @@ class OllamaClient:
                         
         return embeddings
 
-    def chat_stream(self, system_prompt: str, user_prompt: str) -> Generator[str, None, None]:
+    def chat_stream(self, system_prompt: str, user_prompt: str, history: List[Dict[str, str]] = None) -> Generator[str, None, None]:
         """
         Stream chat responses from Ollama using the /api/chat endpoint.
         """
         url = f"{self.base_url}/api/chat"
+        
+        messages = [{"role": "system", "content": system_prompt}]
+        if history:
+            messages.extend(history)
+        messages.append({"role": "user", "content": user_prompt})
+        
         payload = {
             "model": LLM_MODEL,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            "messages": messages,
             "stream": True,
             "options": {
                 "temperature": 0.2,
@@ -94,17 +97,20 @@ class OllamaClient:
             logger.error(f"Error in Ollama chat stream: {e}")
             yield f"\n[Error streaming from LLM: {str(e)}]"
 
-    def chat(self, system_prompt: str, user_prompt: str) -> str:
+    def chat(self, system_prompt: str, user_prompt: str, history: List[Dict[str, str]] = None) -> str:
         """
         Get complete chat response from Ollama (non-streaming).
         """
         url = f"{self.base_url}/api/chat"
+        
+        messages = [{"role": "system", "content": system_prompt}]
+        if history:
+            messages.extend(history)
+        messages.append({"role": "user", "content": user_prompt})
+        
         payload = {
             "model": LLM_MODEL,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            "messages": messages,
             "stream": False,
             "options": {
                 "temperature": 0.2,

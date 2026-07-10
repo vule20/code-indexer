@@ -47,9 +47,14 @@ class IndexRequest(BaseModel):
     name: Optional[str] = None
     overwrite: Optional[bool] = False
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
 class ChatRequest(BaseModel):
     collection: str
     message: str
+    history: Optional[List[ChatMessage]] = []
     num_results: Optional[int] = 5
 
 def run_indexing_in_background(path: str, collection_name: str, overwrite: bool):
@@ -214,6 +219,9 @@ async def chat_with_codebase(req: ChatRequest):
             "content": res["content"]
         })
         
+    # Map Pydantic history objects to standard dict list
+    history_list = [{"role": msg.role, "content": msg.content} for msg in req.history] if req.history else None
+
     async def sse_generator():
         import json
         # Yield metadata reference structure first
@@ -230,7 +238,7 @@ async def chat_with_codebase(req: ChatRequest):
             f"Context:\n{context_str}"
         )
         
-        for chunk in client.chat_stream(system_prompt, req.message):
+        for chunk in client.chat_stream(system_prompt, req.message, history=history_list):
             yield f"event: message\ndata: {json.dumps(chunk)}\n\n"
             
         yield "event: end\ndata: [DONE]\n\n"

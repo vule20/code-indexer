@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeCollection = null;
     let isIndexing = false;
     let indexPollInterval = null;
+    let chatHistory = [];
 
     // Theme Toggle
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -177,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messagesList.innerHTML = '';
         messagesList.classList.add('hidden');
         emptyState.classList.remove('hidden');
+        chatHistory = [];
         
         chatInput.focus();
     }
@@ -329,7 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     collection: activeCollection,
                     message: message,
-                    num_results: parseInt(numResults)
+                    num_results: parseInt(numResults),
+                    history: chatHistory
                 })
             });
 
@@ -384,6 +387,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+
+            // Save conversation turns to chatHistory
+            chatHistory.push({ role: 'user', content: message });
+            chatHistory.push({ role: 'assistant', content: accumulatedResponse });
 
         } catch (err) {
             console.error('Chat stream error:', err);
