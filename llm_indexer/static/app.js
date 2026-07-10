@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatInput = document.getElementById('chat-input');
     const btnSend = document.getElementById('btn-send');
     const chatForm = document.getElementById('chat-form');
+    const clearChatBtn = document.getElementById('clear-chat');
     
     // Modal Elements
     const referenceModal = document.getElementById('reference-modal');
@@ -123,6 +124,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Clear Chat History Handler
+    if (clearChatBtn) {
+        clearChatBtn.addEventListener('click', () => {
+            if (activeCollection && confirm(`Are you sure you want to clear the chat history for '${activeCollection}'?`)) {
+                chatHistory = [];
+                localStorage.removeItem(`chat_history_${activeCollection}`);
+                messagesList.innerHTML = '';
+                messagesList.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            }
+        });
+    }
+
     // API Call: List Collections
     async function fetchCollections() {
         try {
@@ -180,11 +194,46 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSend.removeAttribute('disabled');
         chatInput.placeholder = `Ask a question about '${name}'...`;
         
-        // Reset chat screen
+        // Reset chat screen and load history from localStorage
         messagesList.innerHTML = '';
-        messagesList.classList.add('hidden');
-        emptyState.classList.remove('hidden');
-        chatHistory = [];
+        const stored = localStorage.getItem(`chat_history_${name}`);
+        if (stored) {
+            try {
+                chatHistory = JSON.parse(stored);
+            } catch (e) {
+                chatHistory = [];
+            }
+        } else {
+            chatHistory = [];
+        }
+
+        if (chatHistory.length > 0) {
+            emptyState.classList.add('hidden');
+            messagesList.classList.remove('hidden');
+            
+            chatHistory.forEach(msg => {
+                if (msg.role === 'user') {
+                    appendMessage('user', msg.content);
+                } else {
+                    const msgDiv = appendMessage('bot', marked.parse(msg.content));
+                    if (msg.references && msg.references.length > 0) {
+                        renderReferences(msgDiv, msg.references);
+                    }
+                }
+            });
+
+            // Highlight syntax
+            messagesList.querySelectorAll('pre code').forEach((block) => {
+                Prism.highlightElement(block);
+            });
+            // Scroll to bottom
+            setTimeout(() => {
+                messagesList.parentElement.scrollTop = messagesList.parentElement.scrollHeight;
+            }, 100);
+        } else {
+            messagesList.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+        }
         
         chatInput.focus();
     }
@@ -396,7 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Save conversation turns to chatHistory
             chatHistory.push({ role: 'user', content: message });
-            chatHistory.push({ role: 'assistant', content: accumulatedResponse });
+            chatHistory.push({ role: 'assistant', content: accumulatedResponse, references: references });
+            localStorage.setItem(`chat_history_${activeCollection}`, JSON.stringify(chatHistory));
 
         } catch (err) {
             console.error('Chat stream error:', err);
