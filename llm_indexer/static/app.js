@@ -37,6 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let isIndexing = false;
     let indexPollInterval = null;
 
+    // Theme Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+        themeIcon.setAttribute('data-lucide', 'moon');
+    }
+
     // Initialize Lucide Icons
     lucide.createIcons();
 
@@ -96,6 +104,17 @@ document.addEventListener('DOMContentLoaded', () => {
             referenceModal.classList.add('hidden');
         }
     });
+
+    // Theme Toggle Handler
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            themeIcon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
+            lucide.createIcons();
+        });
+    }
 
     // API Call: List Collections
     async function fetchCollections() {
