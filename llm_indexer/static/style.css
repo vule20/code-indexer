@@ -859,10 +859,6 @@ body.light-theme .suggestion-btn:hover {
     background-color: rgba(99, 102, 241, 0.05);
 }
 
-body.light-theme .message-bubble pre {
-    background-color: #f3f3f3 !important;
-}
-
 body.light-theme .message-bubble code {
     background-color: rgba(0, 0, 0, 0.04);
     color: #b45309;
@@ -933,57 +929,4 @@ body.light-theme .reference-tag:hover {
 .message-bubble pre .token.variable,
 .modal-body pre .token.variable {
     color: #9cdcfe !important;
-}
-
-/* --- Light Theme (VS Code Light) --- */
-body.light-theme .message-bubble pre,
-body.light-theme .modal-body pre {
-    background-color: #f3f3f3 !important;
-    border: 1px solid #e4e4e7 !important;
-}
-body.light-theme .message-bubble pre code,
-body.light-theme .modal-body pre code {
-    color: #000000 !important;
-}
-body.light-theme .message-bubble pre .token.comment,
-body.light-theme .modal-body pre .token.comment {
-    color: #008000 !important;
-    font-style: italic !important;
-}
-body.light-theme .message-bubble pre .token.keyword,
-body.light-theme .modal-body pre .token.keyword {
-    color: #0000ff !important;
-    font-weight: bold !important;
-}
-body.light-theme .message-bubble pre .token.string,
-body.light-theme .modal-body pre .token.string {
-    color: #a31515 !important;
-}
-body.light-theme .message-bubble pre .token.number,
-body.light-theme .modal-body pre .token.number,
-body.light-theme .message-bubble pre .token.boolean,
-body.light-theme .modal-body pre .token.boolean {
-    color: #098658 !important;
-}
-body.light-theme .message-bubble pre .token.function,
-body.light-theme .modal-body pre .token.function {
-    color: #795e26 !important;
-}
-body.light-theme .message-bubble pre .token.class-name,
-body.light-theme .modal-body pre .token.class-name,
-body.light-theme .message-bubble pre .token.type,
-body.light-theme .modal-body pre .token.type {
-    color: #267f99 !important;
-}
-body.light-theme .message-bubble pre .token.operator,
-body.light-theme .modal-body pre .token.operator,
-body.light-theme .message-bubble pre .token.punctuation,
-body.light-theme .modal-body pre .token.punctuation {
-    color: #000000 !important;
-}
-body.light-theme .message-bubble pre .token.property,
-body.light-theme .modal-body pre .token.property,
-body.light-theme .message-bubble pre .token.variable,
-body.light-theme .modal-body pre .token.variable {
-    color: #001080 !important;
 }
