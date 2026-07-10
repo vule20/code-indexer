@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Codebase Q&A Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js (Markdown parser) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- PrismJS (Syntax Highlighting) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="binary" class="logo-icon"></i>
+                    <span>CodeIndexer</span>
+                </div>
+                <span class="badge badge-local">Local LLM</span>
+            </div>
+
+            <!-- Index List Section -->
+            <div class="sidebar-section">
+                <h3><i data-lucide="database"></i> Indexed Codebases</h3>
+                <div id="collections-list" class="collections-list">
+                    <div class="loading-text">Loading collections...</div>
+                </div>
+            </div>
+
+            <!-- Index New Section -->
+            <div class="sidebar-section index-form-section">
+                <h3><i data-lucide="plus-circle"></i> Index New Directory</h3>
+                <form id="index-form" class="index-form">
+                    <div class="form-group">
+                        <label for="dir-path">Directory Path</label>
+                        <input type="text" id="dir-path" placeholder="/absolute/path/to/codebase" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="col-name">Collection Name (Optional)</label>
+                        <input type="text" id="col-name" placeholder="mlir-aie">
+                    </div>
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="overwrite-db">
+                        <label for="overwrite-db">Overwrite if exists</label>
+                    </div>
+                    <button type="submit" id="btn-index" class="btn btn-primary">
+                        <i data-lucide="hammer"></i> Build Index
+                    </button>
+                </form>
+            </div>
+
+            <!-- Progress Card (Hidden initially) -->
+            <div id="progress-card" class="progress-card hidden">
+                <div class="progress-header">
+                    <span id="progress-status-text" class="progress-status">Indexing...</span>
+                    <span id="progress-time" class="progress-time">0.00s</span>
+                </div>
+                <div class="progress-details">
+                    <div class="progress-bar-container">
+                        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <div>Files: <span id="stat-files" class="stat-num">-</span></div>
+                        <div>Chunks: <span id="stat-chunks" class="stat-num">-</span></div>
+                        <div>Added: <span id="stat-processed" class="stat-num">-</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Models Info -->
+            <div class="sidebar-footer">
+                <div class="model-info">
+                    <div class="model-row">
+                        <span class="lbl">LLM:</span>
+                        <span class="val">qwen2.5-coder:14b</span>
+                    </div>
+                    <div class="model-row">
+                        <span class="lbl">Embed:</span>
+                        <span class="val">nomic-embed-text</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="main-content">
+            <!-- Active Codebase Header -->
+            <header class="chat-header">
+                <div class="active-codebase-info">
+                    <i data-lucide="folder-git" class="header-icon"></i>
+                    <div>
+                        <h2 id="active-codebase-title">Select a Codebase</h2>
+                        <p id="active-codebase-sub">Choose an indexed database from the sidebar to start asking questions</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="retrieval-setting">
+                        <label for="num-results-select">Top Matches:</label>
+                        <select id="num-results-select" class="select-field">
+                            <option value="3">3 Chunks</option>
+                            <option value="5" selected>5 Chunks</option>
+                            <option value="8">8 Chunks</option>
+                            <option value="12">12 Chunks</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Window -->
+            <div class="chat-window">
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state">
+                    <i data-lucide="message-square-code" class="empty-icon"></i>
+                    <h2>Ask Questions About Your Code</h2>
+                    <p>Enter any question to search local code semantics and generate answers using the local coder LLM.</p>
+                    <div class="example-queries">
+                        <h4>Try asking things like:</h4>
+                        <div class="query-suggestions">
+                            <button class="suggestion-btn">Explain the high-level architecture of this codebase.</button>
+                            <button class="suggestion-btn">How are objectFifo operations implemented?</button>
+                            <button class="suggestion-btn">Show me an example configuration for AIE tiles.</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message List -->
+                <div id="messages-list" class="messages-list hidden">
+                    <!-- Dynamic chat messages go here -->
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <footer class="chat-input-footer">
+                <form id="chat-form" class="chat-form">
+                    <textarea 
+                        id="chat-input" 
+                        placeholder="Ask a question about the active codebase... (Press Enter to send, Shift+Enter for new line)"
+                        required
+                        disabled
+                    ></textarea>
+                    <button type="submit" id="btn-send" class="btn btn-send" disabled>
+                        <i data-lucide="send"></i>
+                    </button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Reference Viewer Modal -->
+    <div id="reference-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-file-title">File Name</h3>
+                    <p id="modal-file-subtitle">File Path</p>
+                </div>
+                <button class="close-modal" id="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre class="line-numbers"><code id="modal-code-block" class="language-cpp"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
