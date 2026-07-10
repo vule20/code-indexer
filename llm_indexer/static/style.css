@@ -560,7 +560,7 @@ body {
     margin-bottom: 0;
 }
 
-.message-bubble code {
+.message-bubble :not(pre) > code {
     font-family: 'Fira Code', monospace;
     font-size: 0.85rem;
     background-color: rgba(255, 255, 255, 0.08);
@@ -859,7 +859,7 @@ body.light-theme .suggestion-btn:hover {
     background-color: rgba(99, 102, 241, 0.05);
 }
 
-body.light-theme .message-bubble code {
+body.light-theme .message-bubble :not(pre) > code {
     background-color: rgba(0, 0, 0, 0.04);
     color: #b45309;
 }
@@ -929,4 +929,57 @@ body.light-theme .reference-tag:hover {
 .message-bubble pre .token.variable,
 .modal-body pre .token.variable {
     color: #9cdcfe !important;
+}
+
+/* --- Light Theme (VS Code Light / GitHub Light) --- */
+body.light-theme .message-bubble pre,
+body.light-theme .modal-body pre {
+    background-color: #f6f8fa !important;
+    border: 1px solid #d0d7de !important;
+}
+body.light-theme .message-bubble pre code,
+body.light-theme .modal-body pre code {
+    color: #24292f !important;
+}
+body.light-theme .message-bubble pre .token.comment,
+body.light-theme .modal-body pre .token.comment {
+    color: #6e7781 !important;
+    font-style: italic !important;
+}
+body.light-theme .message-bubble pre .token.keyword,
+body.light-theme .modal-body pre .token.keyword {
+    color: #cf222e !important;
+    font-weight: bold !important;
+}
+body.light-theme .message-bubble pre .token.string,
+body.light-theme .modal-body pre .token.string {
+    color: #0a3069 !important;
+}
+body.light-theme .message-bubble pre .token.number,
+body.light-theme .modal-body pre .token.number,
+body.light-theme .message-bubble pre .token.boolean,
+body.light-theme .modal-body pre .token.boolean {
+    color: #0550ae !important;
+}
+body.light-theme .message-bubble pre .token.function,
+body.light-theme .modal-body pre .token.function {
+    color: #8250df !important;
+}
+body.light-theme .message-bubble pre .token.class-name,
+body.light-theme .modal-body pre .token.class-name,
+body.light-theme .message-bubble pre .token.type,
+body.light-theme .modal-body pre .token.type {
+    color: #953800 !important;
+}
+body.light-theme .message-bubble pre .token.operator,
+body.light-theme .modal-body pre .token.operator,
+body.light-theme .message-bubble pre .token.punctuation,
+body.light-theme .modal-body pre .token.punctuation {
+    color: #24292f !important;
+}
+body.light-theme .message-bubble pre .token.property,
+body.light-theme .modal-body pre .token.property,
+body.light-theme .message-bubble pre .token.variable,
+body.light-theme .modal-body pre .token.variable {
+    color: #953800 !important;
 }
