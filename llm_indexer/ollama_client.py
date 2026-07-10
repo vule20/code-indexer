@@ -71,7 +71,7 @@ class OllamaClient:
             "stream": True,
             "options": {
                 "temperature": 0.2,
-                "num_ctx": 16384
+                "num_ctx": 24576
             }
         }
         
@@ -108,7 +108,7 @@ class OllamaClient:
             "stream": False,
             "options": {
                 "temperature": 0.2,
-                "num_ctx": 16384
+                "num_ctx": 24576
             }
         }
         
