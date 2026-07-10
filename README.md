@@ -18,10 +18,6 @@ pip install -r requirements.txt
 ## 2. CHOP CODES (INDEX)
 You tell tool where code is. Tool chop code to chunks. Tool make embeddings.
 ```bash
-python3 -m llm_indexer.cli index /path/to/your/codebase --name my-codebase
-```
-Example for mlir-aie:
-```bash
 python3 -m llm_indexer.cli index /home/vule/workspace/mlir-aie --name mlir-aie --overwrite
 ```
 
