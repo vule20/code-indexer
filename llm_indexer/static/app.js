@@ -94,8 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function adjustTextareaHeight() {
-        chatInput.style.height = '24px';
-        chatInput.style.height = (chatInput.scrollHeight - 10) + 'px';
+        chatInput.style.height = 'auto';
+        chatInput.style.height = chatInput.scrollHeight + 'px';
     }
 
     // Modal click out to close

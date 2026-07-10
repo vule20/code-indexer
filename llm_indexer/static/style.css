@@ -683,7 +683,9 @@ body {
     resize: none;
     height: 24px;
     max-height: 160px;
-    line-height: 1.5;
+    line-height: 1.4;
+    overflow-y: hidden;
+    padding: 2px 0;
 }
 
 .btn-send {
