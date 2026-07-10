@@ -10,6 +10,14 @@ ollama run qwen2.5-coder:14b
 ollama run nomic-embed-text:latest
 ```
 
+## 0.5. OPENROUTER (CLOUD BRAIN)
+If you no want local brain (too slow or computer hot), you can use OpenRouter!
+1. Open Web UI (👉 http://127.0.0.1:8080)
+2. Click gear button ⚙️ top right
+3. Select `OpenRouter (Cloud API)`
+4. Put OpenRouter API Key and Cloud Model (e.g. `google/gemini-2.5-flash`)
+5. Save! Badge change to `Cloud LLM`
+
 ## 1. INSTALL STUFF
 ```bash
 pip install -r requirements.txt
