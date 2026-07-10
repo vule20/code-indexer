@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from llm_indexer.config import HOST, PORT, LLM_MODEL, EMBEDDING_MODEL
+from llm_indexer.config import HOST, PORT, LLM_MODEL, EMBEDDING_MODEL, CHROMA_DB_PATH
 from llm_indexer.ollama_client import OllamaClient
 from llm_indexer.parser import CodebaseParser
 from llm_indexer.chunker import CodebaseChunker
@@ -56,6 +56,13 @@ class ChatRequest(BaseModel):
     message: str
     history: Optional[List[ChatMessage]] = []
     num_results: Optional[int] = 5
+
+class SaveHistoryRequest(BaseModel):
+    collection: str
+    history: List[Dict[str, Any]]
+
+CHAT_HISTORY_DIR = os.path.join(CHROMA_DB_PATH, "chat_history")
+os.makedirs(CHAT_HISTORY_DIR, exist_ok=True)
 
 def run_indexing_in_background(path: str, collection_name: str, overwrite: bool):
     global indexing_status
@@ -244,6 +251,41 @@ async def chat_with_codebase(req: ChatRequest):
         yield "event: end\ndata: [DONE]\n\n"
         
     return StreamingResponse(sse_generator(), media_type="text/event-stream")
+
+@app.post("/api/chat/history")
+def save_chat_history(req: SaveHistoryRequest):
+    import json
+    file_path = os.path.join(CHAT_HISTORY_DIR, f"{req.collection}.json")
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(req.history, f, indent=2, ensure_ascii=False)
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save history: {str(e)}")
+
+@app.get("/api/chat/history")
+def load_chat_history(collection: str):
+    import json
+    file_path = os.path.join(CHAT_HISTORY_DIR, f"{collection}.json")
+    if not os.path.exists(file_path):
+        return {"history": []}
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            history = json.load(f)
+        return {"history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load history: {str(e)}")
+
+@app.delete("/api/chat/history")
+def clear_chat_history(collection: str):
+    file_path = os.path.join(CHAT_HISTORY_DIR, f"{collection}.json")
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            return {"status": "success"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to clear history: {str(e)}")
+    return {"status": "success"}
 
 # Mount Static Files (must be at the end, so it doesn't mask API routes)
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")

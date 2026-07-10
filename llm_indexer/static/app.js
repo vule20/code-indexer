@@ -126,10 +126,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clear Chat History Handler
     if (clearChatBtn) {
-        clearChatBtn.addEventListener('click', () => {
+        clearChatBtn.addEventListener('click', async () => {
             if (activeCollection && confirm(`Are you sure you want to clear the chat history for '${activeCollection}'?`)) {
+                try {
+                    await fetch(`/api/chat/history?collection=${encodeURIComponent(activeCollection)}`, {
+                        method: 'DELETE'
+                    });
+                } catch (err) {
+                    console.error('Failed to clear chat history on server:', err);
+                }
                 chatHistory = [];
-                localStorage.removeItem(`chat_history_${activeCollection}`);
                 messagesList.innerHTML = '';
                 messagesList.classList.add('hidden');
                 emptyState.classList.remove('hidden');
@@ -173,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Select Active Codebase
-    function selectCollection(name, count) {
+    async function selectCollection(name, count) {
         activeCollection = name;
         
         // Highlight active sidebar item
@@ -194,16 +200,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSend.removeAttribute('disabled');
         chatInput.placeholder = `Ask a question about '${name}'...`;
         
-        // Reset chat screen and load history from localStorage
+        // Reset chat screen and load history from API
         messagesList.innerHTML = '';
-        const stored = localStorage.getItem(`chat_history_${name}`);
-        if (stored) {
-            try {
-                chatHistory = JSON.parse(stored);
-            } catch (e) {
+        try {
+            const res = await fetch(`/api/chat/history?collection=${encodeURIComponent(name)}`);
+            if (res.ok) {
+                const data = await res.json();
+                chatHistory = data.history || [];
+            } else {
                 chatHistory = [];
             }
-        } else {
+        } catch (err) {
+            console.error('Failed to load chat history:', err);
             chatHistory = [];
         }
 
@@ -446,7 +454,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Save conversation turns to chatHistory
             chatHistory.push({ role: 'user', content: message });
             chatHistory.push({ role: 'assistant', content: accumulatedResponse, references: references });
-            localStorage.setItem(`chat_history_${activeCollection}`, JSON.stringify(chatHistory));
+            
+            // Save to backend database
+            fetch('/api/chat/history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    collection: activeCollection,
+                    history: chatHistory
+                })
+            }).catch(err => console.error('Failed to save chat history to backend:', err));
 
         } catch (err) {
             console.error('Chat stream error:', err);
