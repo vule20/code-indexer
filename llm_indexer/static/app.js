@@ -70,6 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     indexForm.addEventListener('submit', handleIndexSubmit);
     chatForm.addEventListener('submit', handleChatSubmit);
+    btnSend.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (chatInput.value.trim() && !btnSend.disabled) {
+            chatForm.requestSubmit();
+        }
+    });
     btnCloseModal.addEventListener('click', () => referenceModal.classList.add('hidden'));
     
     // Suggestion Buttons
