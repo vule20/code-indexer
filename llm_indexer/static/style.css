@@ -584,6 +584,47 @@ body {
     font-size: 0.85rem;
 }
 
+/* Table Styling */
+.message-bubble table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.message-bubble th,
+.message-bubble td {
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: top;
+    min-width: 120px;
+}
+
+.message-bubble th {
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.message-bubble tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+/* Light theme table colors */
+body.light-theme .message-bubble th {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme .message-bubble tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
 /* Stream typing animation indicator */
 .typing-indicator {
     display: flex;
