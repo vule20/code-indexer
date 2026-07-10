@@ -240,7 +240,7 @@ async def chat_with_codebase(req: ChatRequest):
     # Map Pydantic history objects to standard dict list
     history_list = [{"role": msg.role, "content": msg.content} for msg in req.history] if req.history else None
 
-    async def sse_generator():
+    def sse_generator():
         import json
         # Yield metadata reference structure first
         yield f"event: references\ndata: {json.dumps(references)}\n\n"
@@ -249,10 +249,11 @@ async def chat_with_codebase(req: ChatRequest):
         context_str = format_context_snippets(results)
         system_prompt = (
             f"You are an expert software engineer assistant specializing in code explanation, debugging, and architecture design.\n"
-            f"You are helping the user understand a codebase called '{req.collection}'.\n"
-            f"Below are relevant code snippets retrieved from the codebase for context. Use these snippets to answer the user's question.\n"
-            f"Refer to specific files and line numbers where appropriate.\n"
-            f"Write clean code block formatting with proper language specifications.\n\n"
+            f"You are helping the user understand a codebase called '{req.collection}'.\n\n"
+            f"Strict Grounding Rules:\n"
+            f"1. Answer the user's question relying ONLY on the provided Context snippets.\n"
+            f"2. If the Context snippets do not contain the answer or details requested, state clearly that the information is not present in the retrieved codebase snippets. Do not make up or invent code, details, or APIs.\n"
+            f"3. Keep your answers factual and accurate to the provided files. Always cite specific files and line numbers from the retrieved context.\n\n"
             f"Context:\n{context_str}"
         )
         
