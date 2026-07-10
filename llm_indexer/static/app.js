@@ -33,6 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCodeBlock = document.getElementById('modal-code-block');
     const btnCloseModal = document.getElementById('btn-close-modal');
 
+    // Settings DOM Elements
+    const btnSettings = document.getElementById('btn-settings');
+    const settingsModal = document.getElementById('settings-modal');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const btnCancelSettings = document.getElementById('btn-cancel-settings');
+    const settingsForm = document.getElementById('settings-form');
+    const settingsProvider = document.getElementById('settings-provider');
+    const openrouterConfigGroup = document.getElementById('openrouter-config-group');
+    const settingsApiKey = document.getElementById('settings-api-key');
+    const settingsModel = document.getElementById('settings-model');
+    const llmBadge = document.getElementById('llm-badge');
+
     // App State
     let activeCollection = null;
     let isIndexing = false;
@@ -106,10 +118,83 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = chatInput.scrollHeight + 'px';
     }
 
+    // Initialize LLM Settings
+    let currentProvider = localStorage.getItem('llm_provider') || 'ollama';
+    let openrouterApiKey = localStorage.getItem('openrouter_api_key') || '';
+    let openrouterModel = localStorage.getItem('openrouter_model') || 'google/gemini-2.5-flash';
+
+    function updateLLMUI() {
+        if (currentProvider === 'openrouter') {
+            llmBadge.textContent = 'Cloud LLM';
+            llmBadge.className = 'badge badge-cloud';
+        } else {
+            llmBadge.textContent = 'Local LLM';
+            llmBadge.className = 'badge badge-local';
+        }
+    }
+    updateLLMUI();
+
+    // Toggle OpenRouter configs visibility based on provider selection
+    if (settingsProvider) {
+        settingsProvider.addEventListener('change', () => {
+            if (settingsProvider.value === 'openrouter') {
+                openrouterConfigGroup.classList.remove('hidden');
+            } else {
+                openrouterConfigGroup.classList.add('hidden');
+            }
+        });
+    }
+
+    // Open Settings Modal
+    if (btnSettings) {
+        btnSettings.addEventListener('click', () => {
+            // Set input values to current state
+            settingsProvider.value = currentProvider;
+            settingsApiKey.value = openrouterApiKey;
+            settingsModel.value = openrouterModel;
+            
+            // Toggle config group based on provider
+            if (currentProvider === 'openrouter') {
+                openrouterConfigGroup.classList.remove('hidden');
+            } else {
+                openrouterConfigGroup.classList.add('hidden');
+            }
+            
+            settingsModal.classList.remove('hidden');
+        });
+    }
+
+    // Close Settings Modal helpers
+    function closeSettings() {
+        settingsModal.classList.add('hidden');
+    }
+    if (btnCloseSettings) btnCloseSettings.addEventListener('click', closeSettings);
+    if (btnCancelSettings) btnCancelSettings.addEventListener('click', closeSettings);
+
+    // Save Settings Form
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            currentProvider = settingsProvider.value;
+            openrouterApiKey = settingsApiKey.value.trim();
+            openrouterModel = settingsModel.value.trim() || 'google/gemini-2.5-flash';
+            
+            localStorage.setItem('llm_provider', currentProvider);
+            localStorage.setItem('openrouter_api_key', openrouterApiKey);
+            localStorage.setItem('openrouter_model', openrouterModel);
+            
+            updateLLMUI();
+            closeSettings();
+        });
+    }
+
     // Modal click out to close
     window.addEventListener('click', (e) => {
         if (e.target === referenceModal) {
             referenceModal.classList.add('hidden');
+        }
+        if (e.target === settingsModal) {
+            settingsModal.classList.add('hidden');
         }
     });
 
@@ -395,7 +480,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     collection: activeCollection,
                     message: message,
                     num_results: parseInt(numResults),
-                    history: chatHistory
+                    history: chatHistory,
+                    llm_provider: currentProvider,
+                    openrouter_api_key: openrouterApiKey,
+                    openrouter_model: openrouterModel
                 })
             });
 

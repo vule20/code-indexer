@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from llm_indexer.config import HOST, PORT, LLM_MODEL, EMBEDDING_MODEL, CHROMA_DB_PATH
 from llm_indexer.ollama_client import OllamaClient
+from llm_indexer.openrouter_client import OpenRouterClient
 from llm_indexer.parser import CodebaseParser
 from llm_indexer.chunker import CodebaseChunker
 from llm_indexer.store import CodebaseVectorStore
@@ -56,6 +57,9 @@ class ChatRequest(BaseModel):
     message: str
     history: Optional[List[ChatMessage]] = []
     num_results: Optional[int] = 5
+    llm_provider: Optional[str] = "ollama"
+    openrouter_api_key: Optional[str] = None
+    openrouter_model: Optional[str] = None
 
 class SaveHistoryRequest(BaseModel):
     collection: str
@@ -193,7 +197,14 @@ async def chat_with_codebase(req: ChatRequest):
     Stream answers about code snippets using Server-Sent Events (SSE).
     """
     store = CodebaseVectorStore()
-    client = OllamaClient()
+    ollama_client = OllamaClient()
+    
+    if req.llm_provider == "openrouter":
+        if not req.openrouter_api_key:
+            raise HTTPException(status_code=400, detail="OpenRouter API Key is required when provider is openrouter.")
+        chat_client = OpenRouterClient(api_key=req.openrouter_api_key, model=req.openrouter_model or "google/gemini-2.5-flash")
+    else:
+        chat_client = ollama_client
     
     # 1. Retrieve collection details
     count = store.get_collection_count(req.collection)
@@ -204,7 +215,7 @@ async def chat_with_codebase(req: ChatRequest):
         )
         
     # 2. Embed user question
-    query_embeddings = client.embed([req.message])
+    query_embeddings = ollama_client.embed([req.message])
     if not query_embeddings:
         raise HTTPException(status_code=500, detail="Error generating embedding for question.")
         
@@ -245,7 +256,7 @@ async def chat_with_codebase(req: ChatRequest):
             f"Context:\n{context_str}"
         )
         
-        for chunk in client.chat_stream(system_prompt, req.message, history=history_list):
+        for chunk in chat_client.chat_stream(system_prompt, req.message, history=history_list):
             yield f"event: message\ndata: {json.dumps(chunk)}\n\n"
             
         yield "event: end\ndata: [DONE]\n\n"

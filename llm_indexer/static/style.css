@@ -117,6 +117,12 @@ body {
     border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
+.badge-cloud {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
 .sidebar-section {
     margin-bottom: 24px;
 }

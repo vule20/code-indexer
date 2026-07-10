@@ -33,7 +33,7 @@
                     <i data-lucide="binary" class="logo-icon"></i>
                     <span>CodeIndexer</span>
                 </div>
-                <span class="badge badge-local">Local LLM</span>
+                <span class="badge badge-local" id="llm-badge">Local LLM</span>
             </div>
 
             <!-- Index List Section -->
@@ -123,6 +123,9 @@
                     <button id="clear-chat" class="btn-theme-toggle" title="Clear Chat History" type="button" style="margin-right: 8px;">
                         <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                     </button>
+                    <button id="btn-settings" class="btn-theme-toggle" title="LLM Settings" type="button" style="margin-right: 8px;">
+                        <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+                    </button>
                     <button id="theme-toggle" class="btn-theme-toggle" title="Toggle Light/Dark Mode" type="button">
                         <i data-lucide="sun" id="theme-icon" style="width: 16px; height: 16px;"></i>
                     </button>
@@ -181,6 +184,48 @@
             </div>
             <div class="modal-body">
                 <pre class="line-numbers"><code id="modal-code-block" class="language-cpp"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <div>
+                    <h3>LLM Settings</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Choose between Local LLM or OpenRouter Cloud API</p>
+                </div>
+                <button class="close-modal" id="btn-close-settings">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 10px;">
+                <form id="settings-form" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label for="settings-provider" style="font-weight: 500; font-size: 0.9rem;">LLM Provider</label>
+                        <select id="settings-provider" class="select-field" style="width: 100%; box-sizing: border-box;">
+                            <option value="ollama">Ollama (Local LLM)</option>
+                            <option value="openrouter">OpenRouter (Cloud API)</option>
+                        </select>
+                    </div>
+                    
+                    <div id="openrouter-config-group" class="hidden" style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label for="settings-api-key" style="font-weight: 500; font-size: 0.9rem;">OpenRouter API Key</label>
+                            <input type="password" id="settings-api-key" placeholder="sk-or-..." class="text-input" style="width: 100%; box-sizing: border-box;" />
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label for="settings-model" style="font-weight: 500; font-size: 0.9rem;">OpenRouter Model</label>
+                            <input type="text" id="settings-model" placeholder="google/gemini-2.5-flash" class="text-input" style="width: 100%; box-sizing: border-box;" />
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Example: <code>google/gemini-2.5-flash</code> or <code>meta-llama/llama-3-8b-instruct</code></span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="btn" id="btn-cancel-settings" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-color);">Cancel</button>
+                        <button type="submit" class="btn" style="background: var(--primary-gradient); color: white;">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
