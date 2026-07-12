@@ -71,7 +71,7 @@ class CodebaseVectorStore:
         # if the size is very large.
         batch_size = 500
         for i in range(0, len(ids), batch_size):
-            collection.add(
+            collection.upsert(
                 ids=ids[i:i + batch_size],
                 embeddings=embeddings[i:i + batch_size],
                 metadatas=metadatas[i:i + batch_size],
